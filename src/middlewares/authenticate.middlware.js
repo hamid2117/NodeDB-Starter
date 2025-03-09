@@ -1,6 +1,5 @@
 const jwt = require('jsonwebtoken')
 const User = require('../modules/user/user.model')
-const Role = require('../modules/auth/role.model')
 
 module.exports = async function verifyToken(req, res, next) {
   const authHeader = req.headers['authorization']
@@ -11,13 +10,17 @@ module.exports = async function verifyToken(req, res, next) {
 
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Invalid token' })
-    // Load user with associated roles
-    const user = await User.findByPk(decoded.id, { include: Role })
-    if (!user) return res.status(404).json({ message: 'User not found' })
+
+    const userExists = await User.count({
+      where: { id: decoded.id },
+      limit: 1,
+    })
+    if (!userExists) return res.status(404).json({ message: 'User not found' })
+
     req.user = {
-      id: user.id,
-      email: user.email,
-      roles: user.Roles.map((role) => role.name),
+      id: decoded.id,
+      email: decoded.email,
+      permissions: decoded.permissions,
     }
     next()
   })
