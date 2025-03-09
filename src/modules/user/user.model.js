@@ -19,5 +19,10 @@ const User = sequelize.define(
     indexes: [{ unique: true, fields: ['email'] }],
   }
 )
+User.belongsToMany(Role, {
+  through: 'UserRoles',
+  foreignKey: 'userId',
+  as: 'roles',
+})
 
 module.exports = User
