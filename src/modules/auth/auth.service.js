@@ -35,20 +35,47 @@ exports.verifyEmail = async (token) => {
 }
 
 exports.login = async ({ email, password }) => {
-  const user = await User.findOne({ where: { email } })
+  const user = await User.findOne({
+    where: { email },
+    include: [
+      {
+        association: 'roles',
+        include: [
+          {
+            association: 'permissions',
+          },
+        ],
+      },
+    ],
+  })
+
+  // Extract permission names to a flat array
+  const permissionNames = []
+  user.roles.forEach((role) => {
+    role.permissions.forEach((permission) => {
+      permissionNames.push(permission.name)
+    })
+  })
+
   if (!user) throw new Error('Invalid email or password.')
   if (!user.isVerified) throw new Error('Email not verified.')
 
   const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) throw new Error('Invalid email or password.')
 
-  const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: '15m',
-  })
-  const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  })
-  return { accessToken, refreshToken }
+  const accessToken = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      permissions: permissionNames,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '7d',
+    }
+  )
+
+  return { accessToken }
 }
 
 exports.forgotPassword = async (email) => {
