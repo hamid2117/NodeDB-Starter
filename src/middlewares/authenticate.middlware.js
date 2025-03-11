@@ -11,12 +11,6 @@ module.exports = async function verifyToken(req, res, next) {
   jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
     if (err) return res.status(403).json({ message: 'Invalid token' })
 
-    const userExists = await User.count({
-      where: { id: decoded.id },
-      limit: 1,
-    })
-    if (!userExists) return res.status(404).json({ message: 'User not found' })
-
     req.user = {
       id: decoded.id,
       email: decoded.email,
