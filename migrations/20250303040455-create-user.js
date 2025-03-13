@@ -13,6 +13,15 @@ module.exports = {
       email: { type: Sequelize.STRING, allowNull: false, unique: true },
       passwordHash: { type: Sequelize.STRING, allowNull: false },
       isVerified: { type: Sequelize.BOOLEAN, defaultValue: false },
+      roleId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'Roles',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
