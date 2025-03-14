@@ -1,6 +1,6 @@
 const { logger } = require('../utils')
 
-module.exports = (err, req, res, next) => {
+module.exports = (err, req, res) => {
   logger.error(`${req.method} ${req.url} - ${err.message}`, {
     stack: err.stack,
   })

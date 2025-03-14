@@ -1,4 +1,4 @@
-const authorize = (permission) => {
+module.exports = function authorize(permission) {
   return async (req, res, next) => {
     const userPermissions = req.user.permissions || []
 
@@ -11,5 +11,3 @@ const authorize = (permission) => {
     }
   }
 }
-
-export { authorize }
