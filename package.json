@@ -10,7 +10,9 @@
     "test": "jest --coverage",
     "migrate": "sequelize db:migrate",
     "seed": "sequelize db:seed:all",
-    "db": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
+    "db": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
+    "db:reset": "npx sequelize-cli db:drop && npm run db",
+    "db:refresh": "npx sequelize-cli db:migrate:undo:all && npm run db"
   },
   "dependencies": {
     "bcrypt": "^5.1.0",
