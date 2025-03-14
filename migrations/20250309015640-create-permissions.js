@@ -5,7 +5,7 @@ module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('Permissions', {
       id: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
@@ -27,7 +27,7 @@ module.exports = {
 
     await queryInterface.createTable('RolePermissions', {
       roleId: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false,
         references: {
@@ -38,7 +38,7 @@ module.exports = {
         onUpdate: 'CASCADE',
       },
       permissionId: {
-        type: Sequelize.UUID,
+        type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false,
         references: {
