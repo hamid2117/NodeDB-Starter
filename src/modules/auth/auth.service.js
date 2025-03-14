@@ -1,8 +1,10 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
-const User = require('../user/user.model')
-
+const models = require('../../../models')
+const User = models.User
+const Role = models.Role
+const Permission = models.Permission
 const SALT_ROUNDS = 10
 
 exports.register = async ({ name, email, password }) => {
@@ -39,10 +41,12 @@ exports.login = async ({ email, password }) => {
     where: { email },
     include: [
       {
-        association: 'role',
+        model: Role,
+        as: 'role',
         include: [
           {
-            association: 'permission',
+            model: Permission,
+            association: 'permissions',
           },
         ],
       },
@@ -51,10 +55,8 @@ exports.login = async ({ email, password }) => {
 
   // Extract permission names to a flat array
   const permissionNames = []
-  user.roles.forEach((role) => {
-    role.permissions.forEach((permission) => {
-      permissionNames.push(permission.name)
-    })
+  user.role.permissions.forEach((permission) => {
+    permissionNames.push(permission.name)
   })
 
   if (!user) throw new Error('Invalid email or password.')

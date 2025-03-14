@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize')
 const sequelize = require('../../config/db.config')
-const Permission = require('./permission.model')
 
 const Role = sequelize.define(
   'Role',

@@ -1,43 +1,74 @@
-'use strict';
+'use strict'
 
-const fs = require('fs');
-const path = require('path');
-const Sequelize = require('sequelize');
-const process = require('process');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.json')[env];
-const db = {};
+const fs = require('fs')
+const path = require('path')
+const Sequelize = require('sequelize')
+const process = require('process')
+const env = process.env.NODE_ENV || 'development'
+const config = require(__dirname + '/../config/config.json')[env]
+const db = {}
 
-let sequelize;
+let sequelize
 if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+  sequelize = new Sequelize(process.env[config.use_env_variable], config)
 } else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  )
 }
 
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (
-      file.indexOf('.') !== 0 &&
-      file !== basename &&
-      file.slice(-3) === '.js' &&
-      file.indexOf('.test.js') === -1
-    );
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
+// Recursive function to find all model files
+function findModelFiles(dir, modelFiles = []) {
+  const files = fs.readdirSync(dir)
 
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
+  for (const file of files) {
+    const filePath = path.join(dir, file)
+    const stat = fs.statSync(filePath)
+
+    if (stat.isDirectory() && file !== 'node_modules' && file !== 'public') {
+      findModelFiles(filePath, modelFiles)
+    } else if (file.endsWith('.model.js')) {
+      modelFiles.push(filePath)
+    }
   }
-});
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+  return modelFiles
+}
 
-module.exports = db;
+// Find all .model files in the project
+const projectRoot = path.resolve(__dirname, '../src/modules')
+const modelFiles = findModelFiles(projectRoot)
+
+// Load each model
+modelFiles.forEach((file) => {
+  const model = require(file)
+  if (model.name) {
+    db[model.name] = model
+  }
+})
+
+// Set up associations
+console.log('Loaded models:', Object.keys(db))
+
+// Enhanced association setup with logging
+Object.keys(db).forEach((modelName) => {
+  if (db[modelName].associate) {
+    console.log(`Setting up associations for model: ${modelName}`)
+    db[modelName].associate(db)
+
+    // Log the associations that were set up
+    if (db[modelName].associations) {
+      console.log(
+        `Associations for ${modelName}:`,
+        Object.keys(db[modelName].associations)
+      )
+    }
+  }
+})
+db.sequelize = sequelize
+db.Sequelize = Sequelize
+
+module.exports = db
