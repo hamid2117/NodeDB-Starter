@@ -39,10 +39,10 @@ exports.login = async ({ email, password }) => {
     where: { email },
     include: [
       {
-        association: 'roles',
+        association: 'role',
         include: [
           {
-            association: 'permissions',
+            association: 'permission',
           },
         ],
       },

@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt')
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   up: async (queryInterface) => {
-    // Create default admin user with reference to admin role
     const users = [
       {
         id: 1,
@@ -30,7 +29,7 @@ module.exports = {
     ]
 
     await queryInterface.bulkInsert('Users', users, {
-      updateOnDuplicate: ['email', 'name', 'roleId'],
+      ignoreDuplicates: true,
     })
   },
   down: async (queryInterface) => {

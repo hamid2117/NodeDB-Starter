@@ -14,12 +14,14 @@ const Permission = sequelize.define(
   },
   {
     timestamps: false,
+    tableName: 'Permissions',
   }
 )
 
 Permission.belongsToMany(Role, {
   through: 'RolePermissions',
   foreignKey: 'permissionId',
+  otherKey: 'roleId',
   as: 'roles',
 })
 

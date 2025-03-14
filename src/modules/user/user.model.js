@@ -19,7 +19,7 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: roles.user.id,
       references: {
-        model: 'Roles',
+        model: 'Role',
         key: 'id',
       },
     },
@@ -27,7 +27,12 @@ const User = sequelize.define(
   },
   {
     indexes: [{ unique: true, fields: ['email'] }],
+    tableName: 'Users',
   }
 )
+
+User.associate = function (models) {
+  User.belongsTo(models.Role, { foreignKey: 'roleId', as: 'role' })
+}
 
 module.exports = User

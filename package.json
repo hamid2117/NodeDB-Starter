@@ -11,7 +11,7 @@
     "migrate": "sequelize db:migrate",
     "seed": "sequelize db:seed:all",
     "db": "npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all",
-    "db:reset": "npx sequelize-cli db:drop && npm run db",
+    "db:reset": "npx sequelize-cli db:drop && npx sequelize-cli db:create && npm run db",
     "db:refresh": "npx sequelize-cli db:migrate:undo:all && npm run db"
   },
   "dependencies": {
