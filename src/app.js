@@ -4,7 +4,7 @@ const express = require('express')
 const morgan = require('morgan')
 const helmet = require('helmet')
 const { json, urlencoded } = express
-const logger = require('./utils/logger')
+const { logger } = require('./utils')
 const errorHandler = require('./middlewares/error.middleware')
 
 // Import routes
