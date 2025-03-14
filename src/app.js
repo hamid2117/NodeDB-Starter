@@ -1,8 +1,9 @@
-// src/app.js
 require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const helmet = require('helmet')
+const cookieParser = require('cookie-parser')
+const fileUpload = require('express-fileupload')
 const { json, urlencoded } = express
 const { logger } = require('./utils')
 const errorHandler = require('./middlewares/error.middleware')
@@ -22,6 +23,10 @@ app.use(helmet())
 app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(morgan('dev'))
+
+app.use(cookieParser(process.env.JWT_SECRET))
+app.use(fileUpload())
+
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDocument))
 
 // Routes
@@ -29,7 +34,7 @@ app.use('/api/v1/auth', authRoutes)
 app.use('/api/v1/users', userRoutes)
 
 // 404 handler
-app.use((req, res, next) => {
+app.use((_req, res, _next) => {
   res.status(404).json({ message: 'Not Found' })
 })
 
