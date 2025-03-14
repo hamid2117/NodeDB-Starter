@@ -10,8 +10,22 @@ module.exports = {
         primaryKey: true,
       },
       name: { type: Sequelize.STRING, allowNull: false, unique: true },
+      title: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      accessLevel: {
+        type: Sequelize.STRING,
+        allowNull: false,
+        defaultValue: 'any',
+      },
     })
   },
+
   down: async (queryInterface) => {
     await queryInterface.dropTable('Roles')
   },

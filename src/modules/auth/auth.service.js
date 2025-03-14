@@ -1,8 +1,10 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
-const User = require('../user/user.model')
-
+const models = require('../../../models')
+const User = models.User
+const Role = models.Role
+const Permission = models.Permission
 const SALT_ROUNDS = 10
 
 exports.register = async ({ name, email, password }) => {
@@ -35,20 +37,47 @@ exports.verifyEmail = async (token) => {
 }
 
 exports.login = async ({ email, password }) => {
-  const user = await User.findOne({ where: { email } })
+  const user = await User.findOne({
+    where: { email },
+    include: [
+      {
+        model: Role,
+        as: 'role',
+        include: [
+          {
+            model: Permission,
+            association: 'permissions',
+          },
+        ],
+      },
+    ],
+  })
+
+  // Extract permission names to a flat array
+  const permissionNames = []
+  user.role.permissions.forEach((permission) => {
+    permissionNames.push(permission.name)
+  })
+
   if (!user) throw new Error('Invalid email or password.')
   if (!user.isVerified) throw new Error('Email not verified.')
 
   const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) throw new Error('Invalid email or password.')
 
-  const accessToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: '15m',
-  })
-  const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-    expiresIn: '7d',
-  })
-  return { accessToken, refreshToken }
+  const accessToken = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      permissions: permissionNames,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: '7d',
+    }
+  )
+
+  return { accessToken }
 }
 
 exports.forgotPassword = async (email) => {
