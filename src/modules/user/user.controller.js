@@ -1,5 +1,5 @@
 const userService = require('./user.service')
-const { successResponse } = require('../../utils/responseHandler')
+const { successResponse } = require('../../utils')
 
 exports.getProfile = async (req, res, next) => {
   try {
