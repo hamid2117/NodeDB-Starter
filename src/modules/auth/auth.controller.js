@@ -1,15 +1,23 @@
 const authService = require('./auth.service')
-const { successResponse } = require('../../utils')
+const { successResponse, attachCookiesToResponse } = require('../../utils')
+const {
+  registerSchema,
+  verifyEmailSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} = require('./auth.schema')
 
 exports.register = async (req, res, next) => {
   try {
-    const user = await authService.register(req.body)
+    registerSchema.parse(req.body)
+    await authService.register(req.body)
     res
       .status(201)
       .json(
         successResponse(
-          user,
-          'Registration successful. Please verify your email.'
+          null,
+          'Success! Please check your email to verify account'
         )
       )
   } catch (err) {
@@ -19,7 +27,8 @@ exports.register = async (req, res, next) => {
 
 exports.verifyEmail = async (req, res, next) => {
   try {
-    await authService.verifyEmail(req.query.token)
+    verifyEmailSchema.parse(req.body)
+    await authService.verifyEmail(req.body)
     res.status(200).json(successResponse(null, 'Email verified successfully.'))
   } catch (err) {
     next(err)
@@ -28,8 +37,27 @@ exports.verifyEmail = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   try {
-    const tokens = await authService.login(req.body)
-    res.status(200).json(successResponse(tokens, 'Login successful.'))
+    loginSchema.parse(req.body)
+    const user = await authService.login(req.body)
+
+    const payload = {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+    }
+
+    attachCookiesToResponse({ res, user: payload })
+
+    res.status(200).json(
+      successResponse(
+        {
+          email: user.email,
+          name: user.name,
+          isVarified: user.isVerified,
+        },
+        'Login successful.'
+      )
+    )
   } catch (err) {
     next(err)
   }
@@ -37,8 +65,16 @@ exports.login = async (req, res, next) => {
 
 exports.forgotPassword = async (req, res, next) => {
   try {
+    forgotPasswordSchema.parse(req.body)
     await authService.forgotPassword(req.body.email)
-    res.status(200).json(successResponse(null, 'Password reset email sent.'))
+    res
+      .status(200)
+      .json(
+        successResponse(
+          null,
+          'Please check your email for reset password link.'
+        )
+      )
   } catch (err) {
     next(err)
   }
@@ -46,7 +82,8 @@ exports.forgotPassword = async (req, res, next) => {
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    await authService.resetPassword(req.body.token, req.body.newPassword)
+    resetPasswordSchema.parse(req.body)
+    await authService.resetPassword(req.body)
     res.status(200).json(successResponse(null, 'Password has been reset.'))
   } catch (err) {
     next(err)

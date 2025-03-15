@@ -1,9 +1,21 @@
 const { logger } = require('../utils')
-
-module.exports = (err, req, res) => {
+const { z } = require('zod')
+module.exports = (err, req, res, _next) => {
   logger.error(`${req.method} ${req.url} - ${err.message}`, {
     stack: err.stack,
   })
+  if (err instanceof z.ZodError) {
+    const formattedErrors = err.errors.map((e) => ({
+      field: e.path.join('.'),
+      message: e.message,
+    }))
+
+    return res.status(400).json({
+      message: 'Validation failed',
+      errors: formattedErrors,
+    })
+  }
+
   const status = err.status || 500
   const response = {
     success: false,

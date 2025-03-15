@@ -51,21 +51,11 @@ modelFiles.forEach((file) => {
 })
 
 // Set up associations
-console.log('Loaded models:', Object.keys(db))
 
 // Enhanced association setup with logging
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
-    console.log(`Setting up associations for model: ${modelName}`)
     db[modelName].associate(db)
-
-    // Log the associations that were set up
-    if (db[modelName].associations) {
-      console.log(
-        `Associations for ${modelName}:`,
-        Object.keys(db[modelName].associations)
-      )
-    }
   }
 })
 db.sequelize = sequelize
