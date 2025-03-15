@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize')
 const sequelize = require('../../config/db.config')
-const Role = require('./role.model')
 
 const Permission = sequelize.define(
   'Permission',
@@ -9,7 +8,6 @@ const Permission = sequelize.define(
     name: { type: DataTypes.STRING, allowNull: false, unique: true },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true,
     },
   },
   {

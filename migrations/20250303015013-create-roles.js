@@ -16,7 +16,6 @@ module.exports = {
       },
       description: {
         type: Sequelize.TEXT,
-        allowNull: true,
       },
       accessLevel: {
         type: Sequelize.STRING,
