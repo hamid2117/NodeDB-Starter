@@ -1,4 +1,5 @@
 require('dotenv').config()
+require('express-async-errors')
 const express = require('express')
 const morgan = require('morgan')
 const helmet = require('helmet')
@@ -7,6 +8,7 @@ const fileUpload = require('express-fileupload')
 const { json, urlencoded } = express
 const { logger } = require('./utils')
 const errorHandler = require('./middlewares/error.middleware')
+const { env } = require('../config/config')
 
 // Import routes
 const authRoutes = require('./modules/auth/auth.routes')
@@ -24,7 +26,7 @@ app.use(json())
 app.use(urlencoded({ extended: true }))
 app.use(morgan('dev'))
 
-app.use(cookieParser(process.env.JWT_SECRET))
+app.use(cookieParser(env.JWT_SECRET))
 app.use(fileUpload())
 
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapiDocument))
@@ -43,7 +45,7 @@ app.use(errorHandler)
 
 // Start the server if not imported by tests
 if (require.main === module) {
-  const PORT = process.env.PORT || 3000
+  const PORT = env.PORT || 3000
   app.listen(PORT, () => logger.info(`Server running on port ${PORT}`))
 }
 

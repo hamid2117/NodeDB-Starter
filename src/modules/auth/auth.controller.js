@@ -38,12 +38,13 @@ exports.verifyEmail = async (req, res, next) => {
 exports.login = async (req, res, next) => {
   try {
     loginSchema.parse(req.body)
-    const user = await authService.login(req.body)
+    const { user, permissionNames } = await authService.login(req.body)
 
     const payload = {
       id: user.id,
       email: user.email,
       name: user.name,
+      permissions: permissionNames,
     }
 
     attachCookiesToResponse({ res, user: payload })
@@ -58,6 +59,23 @@ exports.login = async (req, res, next) => {
         'Login successful.'
       )
     )
+  } catch (err) {
+    next(err)
+  }
+}
+exports.logout = async (_req, res, next) => {
+  try {
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    })
+    res.cookie('token', 'logout', {
+      httpOnly: true,
+      expires: new Date(0),
+    })
+
+    res.status(200).json(successResponse(null, 'Logout successful.'))
   } catch (err) {
     next(err)
   }

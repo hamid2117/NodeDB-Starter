@@ -8,7 +8,7 @@ module.exports = async function verifyToken(req, _res, next) {
     throw new CustomError.UnauthenticatedError('Authentication Invalid')
   }
   try {
-    const { id, email, permissions } = isTokenValid({ token })
+    const { id, email, permissions } = isTokenValid(token)
     req.user = { id, email, permissions }
     next()
   } catch (error) {
