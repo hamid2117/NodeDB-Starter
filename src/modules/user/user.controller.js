@@ -24,14 +24,14 @@ exports.getSingleUser = async (req, res, next) => {
     const { id } = userIdSchema.parse({ id: req.params.id })
 
     const user = await userService.getUserById(id, {
-      attributes: [
-        'id',
-        'name',
-        'email',
-        'permissions',
-        'isVerified',
-        'createdAt',
-      ],
+      attributes: {
+        exclude: [
+          'passwordHash',
+          'verificationToken',
+          'passwordResetToken',
+          'passwordResetExpires',
+        ],
+      },
       include: [
         {
           model: models.Role,
@@ -40,6 +40,7 @@ exports.getSingleUser = async (req, res, next) => {
         },
       ],
     })
+
     if (!user) {
       throw new CustomError.NotFoundError(`No user with id: ${id}`)
     }
@@ -53,15 +54,17 @@ exports.getSingleUser = async (req, res, next) => {
 exports.showCurrentUser = async (req, res, next) => {
   try {
     const user = await userService.getUserById(req.user.id, {
-      attributes: ['name', 'isVerified'],
+      attributes: {
+        exclude: [
+          'passwordHash',
+          'verificationToken',
+          'passwordResetToken',
+          'passwordResetExpires',
+        ],
+      },
     })
-    res.status(200).json(
-      successResponse({
-        ...user.get({ plain: true }),
-        permissions: req.user.permissions,
-        email: req.user.email,
-      })
-    )
+
+    res.status(200).json(successResponse(user))
   } catch (err) {
     next(err)
   }
