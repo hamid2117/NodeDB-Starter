@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const userController = require('./user.controller')
 const authenticateMiddleware = require('../../middlewares/authenticate.middlware')
-const authorizeMiddleware = require('../../middlewares/authorize.middleware')
+const authorizeMiddleware = require('../../middlewares/authorize.middlware')
 
 router.get(
   '/',
@@ -11,8 +11,8 @@ router.get(
   userController.getAllUsers
 )
 
-router.get('/:id', authenticateMiddleware, userController.getSingleUser)
 router.get('/me', authenticateMiddleware, userController.showCurrentUser)
+router.get('/:id', authenticateMiddleware, userController.getSingleUser)
 
 router.patch('/:id', authenticateMiddleware, userController.updateUser)
 

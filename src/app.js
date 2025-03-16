@@ -33,7 +33,7 @@ app.use(fileUpload())
 
 // Routes
 app.use('/api/v1/auth', authRoutes)
-app.use('/api/v1/users', userRoutes)
+app.use('/api/v1/user', userRoutes)
 
 // 404 handler
 app.use((_req, res, _next) => {

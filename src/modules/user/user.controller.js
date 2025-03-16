@@ -7,6 +7,7 @@ const {
   updatePasswordSchema,
   getUsersQuerySchema,
 } = require('./user.schema')
+const models = require('../../../models')
 
 exports.getAllUsers = async (req, res, next) => {
   try {
@@ -56,6 +57,8 @@ exports.showCurrentUser = async (req, res, next) => {
     const user = await userService.getUserById(req.user.id, {
       attributes: {
         exclude: [
+          'id',
+          'roleId',
           'passwordHash',
           'verificationToken',
           'passwordResetToken',
