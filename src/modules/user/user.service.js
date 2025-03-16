@@ -5,10 +5,13 @@ const CustomError = require('../../../errors')
 const { env } = require('../../../config/config')
 const User = models.User
 
-exports.getUserById = async (id) => {
-  return await User.findByPk(id, {
-    attributes: { exclude: ['passwordHash'] },
-  })
+exports.getUserById = async (id, options = {}) => {
+  const queryOptions = {
+    attributes: options.attributes || { exclude: ['passwordHash'] },
+    ...options,
+  }
+
+  return await User.findByPk(id, queryOptions)
 }
 
 exports.updateUser = async (id, updateData) => {

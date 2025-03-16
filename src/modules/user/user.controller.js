@@ -23,7 +23,23 @@ exports.getSingleUser = async (req, res, next) => {
   try {
     const { id } = userIdSchema.parse({ id: req.params.id })
 
-    const user = await userService.getUserById(id)
+    const user = await userService.getUserById(id, {
+      attributes: [
+        'id',
+        'name',
+        'email',
+        'permissions',
+        'isVerified',
+        'createdAt',
+      ],
+      include: [
+        {
+          model: models.Role,
+          as: 'role',
+          attributes: ['name'],
+        },
+      ],
+    })
     if (!user) {
       throw new CustomError.NotFoundError(`No user with id: ${id}`)
     }
@@ -36,7 +52,16 @@ exports.getSingleUser = async (req, res, next) => {
 
 exports.showCurrentUser = async (req, res, next) => {
   try {
-    res.status(200).json(successResponse(req.user))
+    const user = await userService.getUserById(req.user.id, {
+      attributes: ['name', 'isVerified'],
+    })
+    res.status(200).json(
+      successResponse({
+        ...user.get({ plain: true }),
+        permissions: req.user.permissions,
+        email: req.user.email,
+      })
+    )
   } catch (err) {
     next(err)
   }
