@@ -1,55 +1,94 @@
 const userService = require('./user.service')
-const { successResponse } = require('../../utils')
+const { successResponse, attachCookiesToResponse } = require('../../utils')
+const CustomError = require('../../../errors')
+const {
+  userIdSchema,
+  updateUserSchema,
+  updatePasswordSchema,
+  getUsersQuerySchema,
+} = require('./user.schema')
 
-exports.getAllUsers = async (_req, res) => {
-  const users = await userService.getAllUsers()
-  res.status(200).json(successResponse(users))
+exports.getAllUsers = async (req, res, next) => {
+  try {
+    // Validate and parse query parameters
+    const queryParams = getUsersQuerySchema.parse(req.query)
+
+    const users = await userService.getAllUsers(queryParams)
+    res.status(200).json(successResponse(users))
+  } catch (err) {
+    next(err)
+  }
 }
 
-exports.getSingleUser = async (req, res) => {
-  const user = await userService.getUserById({ id: req.params.id })
+exports.getSingleUser = async (req, res, next) => {
+  try {
+    // Validate ID parameter
+    const { id } = userIdSchema.parse({ id: req.params.id })
 
-  if (!user) {
-    throw new CustomError.NotFoundError(`No user with id : ${req.params.id}`)
+    const user = await userService.getUserById(id)
+    if (!user) {
+      throw new CustomError.NotFoundError(`No user with id: ${id}`)
+    }
+
+    res.status(200).json(successResponse(user))
+  } catch (err) {
+    next(err)
   }
-  res.status(200).json(successResponse(user))
 }
 
-exports.showCurrentUser = async (req, res) => {
-  res.status(StatusCodes.OK).json({ user: req.user })
+exports.showCurrentUser = async (req, res, next) => {
+  try {
+    // User is already available from authentication middleware
+    res.status(200).json(successResponse(req.user))
+  } catch (err) {
+    next(err)
+  }
 }
 
-exports.updateUser = async (req, res) => {
-  const { id } = req.params
-  const { name, email } = req.body
-  if (
-    id !== req.user.userId &&
-    !req.user.permissions.includes('manage_users')
-  ) {
-    throw new CustomError.ForbiddenError(
-      'You are not allowed to update this user'
-    )
-  }
-  const user = await userService.updateUser({ id, name, email })
+exports.updateUser = async (req, res, next) => {
+  try {
+    // Validate ID parameter
+    const { id } = userIdSchema.parse({ id: req.params.id })
 
-  const tokenUser = createTokenUser(user)
-  attachCookiesToResponse({ res, user: tokenUser })
-  res.status(200).json(successResponse(user))
+    // Validate request body
+    const updateData = updateUserSchema.parse(req.body)
+
+    // Check permissions
+    if (id !== req.user.id && !req.user.permissions.includes('manage_users')) {
+      throw new CustomError.ForbiddenError(
+        'You are not allowed to update this user'
+      )
+    }
+
+    const user = await userService.updateUser(id, updateData)
+
+    // Update token if user is updating their own profile
+    if (id === req.user.id) {
+      const tokenUser = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        permissions: req.user.permissions,
+      }
+      attachCookiesToResponse({ res, user: tokenUser })
+    }
+
+    res.status(200).json(successResponse(user))
+  } catch (err) {
+    next(err)
+  }
 }
 
-exports.updateUserPassword = async (req, res) => {
-  const { oldPassword, newPassword } = req.body
-  if (!oldPassword || !newPassword) {
-    throw new CustomError.BadRequestError('Please provide both values')
-  }
-  const user = await User.findOne({ _id: req.user.userId })
+exports.updateUserPassword = async (req, res, next) => {
+  try {
+    // Validate password data
+    const { oldPassword, newPassword } = updatePasswordSchema.parse(req.body)
 
-  const isPasswordCorrect = await user.comparePassword(oldPassword)
-  if (!isPasswordCorrect) {
-    throw new CustomError.UnauthenticatedError('Invalid Credentials')
-  }
-  user.password = newPassword
+    const userId = req.user.id
+    await userService.updatePassword(userId, oldPassword, newPassword)
 
-  await user.save()
-  res.status(StatusCodes.OK).json({ msg: 'Success! Password Updated.' })
+    res.status(200).json(successResponse(null, 'Password updated successfully'))
+  } catch (err) {
+    next(err)
+  }
 }
