@@ -10,7 +10,6 @@ const {
 
 exports.getAllUsers = async (req, res, next) => {
   try {
-    // Validate and parse query parameters
     const queryParams = getUsersQuerySchema.parse(req.query)
 
     const users = await userService.getAllUsers(queryParams)
@@ -22,7 +21,6 @@ exports.getAllUsers = async (req, res, next) => {
 
 exports.getSingleUser = async (req, res, next) => {
   try {
-    // Validate ID parameter
     const { id } = userIdSchema.parse({ id: req.params.id })
 
     const user = await userService.getUserById(id)
@@ -38,7 +36,6 @@ exports.getSingleUser = async (req, res, next) => {
 
 exports.showCurrentUser = async (req, res, next) => {
   try {
-    // User is already available from authentication middleware
     res.status(200).json(successResponse(req.user))
   } catch (err) {
     next(err)
@@ -53,7 +50,6 @@ exports.updateUser = async (req, res, next) => {
     // Validate request body
     const updateData = updateUserSchema.parse(req.body)
 
-    // Check permissions
     if (id !== req.user.id && !req.user.permissions.includes('manage_users')) {
       throw new CustomError.ForbiddenError(
         'You are not allowed to update this user'
@@ -62,7 +58,6 @@ exports.updateUser = async (req, res, next) => {
 
     const user = await userService.updateUser(id, updateData)
 
-    // Update token if user is updating their own profile
     if (id === req.user.id) {
       const tokenUser = {
         id: user.id,
@@ -81,7 +76,6 @@ exports.updateUser = async (req, res, next) => {
 
 exports.updateUserPassword = async (req, res, next) => {
   try {
-    // Validate password data
     const { oldPassword, newPassword } = updatePasswordSchema.parse(req.body)
 
     const userId = req.user.id
