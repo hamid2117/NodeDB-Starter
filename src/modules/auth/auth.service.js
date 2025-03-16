@@ -108,25 +108,25 @@ exports.forgotPassword = async (email) => {
     const tenMinutes = 1000 * 60 * 10
     const passwordTokenExpirationDate = new Date(Date.now() + tenMinutes)
 
-    user.passwordToken = createHash(passwordToken)
-    user.passwordTokenExpirationDate = passwordTokenExpirationDate
+    user.passwordResetToken = createHash(passwordToken)
+    user.passwordResetExpires = passwordTokenExpirationDate
     await user.save()
   }
 }
 
-exports.resetPassword = async (token, email, password) => {
+exports.resetPassword = async ({ token, email, password }) => {
   const user = await User.findOne({ where: { email } })
 
   if (user) {
     const currentDate = new Date()
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
     if (
-      user.passwordToken === createHash(token) &&
-      user.passwordTokenExpirationDate > currentDate
+      user.passwordResetToken === createHash(token) &&
+      user.passwordResetExpires > currentDate
     ) {
-      user.password = passwordHash
-      user.passwordToken = null
-      user.passwordTokenExpirationDate = null
+      user.passwordHash = passwordHash
+      user.passwordResetToken = null
+      user.passwordResetExpires = null
       await user.save()
     }
   }

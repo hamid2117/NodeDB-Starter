@@ -17,6 +17,7 @@ exports.forgotPasswordSchema = z.object({
   email: z.string().email(),
 })
 exports.resetPasswordSchema = z.object({
-  token: z.string().uuid(),
-  newPassword: z.string().min(6),
+  token: z.string(),
+  password: z.string().min(6),
+  email: z.string().email(),
 })
