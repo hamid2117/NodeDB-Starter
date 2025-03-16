@@ -5,6 +5,7 @@ const env = {
   NODE_ENV: process.env.NODE_ENV || 'development',
   PORT: parseInt(process.env.PORT || '3000', 10),
   ORIGIN: process.env.ORIGIN || 'http://localhost:3000',
+  SALT_ROUNDS: parseInt(process.env.SALT_ROUNDS || '10', 10),
 
   // JWT
   JWT_SECRET: process.env.JWT_SECRET || 'top_secret',

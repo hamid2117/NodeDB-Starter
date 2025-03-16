@@ -1,5 +1,4 @@
 const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
 const CustomError = require('../../../errors')
 const models = require('../../../models')
@@ -8,19 +7,18 @@ const {
   createHash,
   sendVerificationEmail,
 } = require('../../utils')
+const { env } = require('../../../config/config')
 const User = models.User
 const Role = models.Role
 const Permission = models.Permission
-const SALT_ROUNDS = 10
 
 exports.register = async ({ email, name, password }) => {
   const emailAlreadyExists = await User.findOne({ where: { email } })
-  console.log('emailAlreadyExists', emailAlreadyExists, email)
   if (emailAlreadyExists) {
     throw new CustomError.BadRequestError('Email already exiasts')
   }
 
-  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS)
+  const passwordHash = await bcrypt.hash(password, env.SALT_ROUNDS)
 
   const verificationToken = crypto.randomBytes(40).toString('hex')
 
