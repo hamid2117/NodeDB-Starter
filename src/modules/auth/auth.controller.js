@@ -7,6 +7,7 @@ const {
   forgotPasswordSchema,
   resetPasswordSchema,
 } = require('./auth.schema')
+const { env } = require('../../../config/config')
 
 exports.register = async (req, res, next) => {
   try {
@@ -67,7 +68,7 @@ exports.logout = async (_req, res, next) => {
   try {
     res.clearCookie('token', {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: env.NODE_ENV === 'production',
       sameSite: 'strict',
     })
     res.cookie('token', 'logout', {

@@ -1,10 +1,10 @@
 const nodemailer = require('nodemailer')
-const nodemailerConfig = require('./nodemailerConfig')
+const { emailConfig } = require('../../config/config')
 
 const sendEmail = async ({ to, subject, html }) => {
-  let testAccount = await nodemailer.createTestAccount()
+  //const testAccount = await nodemailer.createTestAccount()
 
-  const transporter = nodemailer.createTransport(nodemailerConfig)
+  const transporter = nodemailer.createTransport(emailConfig)
 
   return transporter.sendMail({
     from: '"Node Starter" <nodestarter@gmail.com>', // sender address

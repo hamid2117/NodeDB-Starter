@@ -30,13 +30,11 @@ exports.register = async ({ email, name, password }) => {
     passwordHash,
     verificationToken,
   })
-  const origin = 'http://localhost:3000'
 
   await sendVerificationEmail({
     name: user.name,
     email: user.email,
     verificationToken: user.verificationToken,
-    origin,
   })
 }
 
@@ -101,12 +99,10 @@ exports.forgotPassword = async (email) => {
   if (user) {
     const passwordToken = crypto.randomBytes(70).toString('hex')
     // send email
-    const origin = 'http://localhost:3000'
     await sendResetPasswordEmail({
       name: user.name,
       email: user.email,
       token: passwordToken,
-      origin,
     })
 
     const tenMinutes = 1000 * 60 * 10

@@ -1,5 +1,6 @@
 const { logger } = require('../utils')
 const { z } = require('zod')
+const { env } = require('../../config/config')
 module.exports = (err, req, res, _next) => {
   logger.error(`${req.method} ${req.url} - ${err.message}`, {
     stack: err.stack,
@@ -21,7 +22,7 @@ module.exports = (err, req, res, _next) => {
     success: false,
     message: err.message || 'Internal Server Error',
   }
-  if (process.env.NODE_ENV !== 'production') {
+  if (env.NODE_ENV !== 'production') {
     response.stack = err.stack
   }
   res.status(status).json(response)
