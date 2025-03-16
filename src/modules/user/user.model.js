@@ -24,6 +24,10 @@ const User = sequelize.define(
       },
     },
     isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+    verificationToken: { type: DataTypes.STRING },
+    verifiedAt: { type: DataTypes.DATE },
+    passwordResetToken: { type: DataTypes.STRING },
+    passwordResetExpires: { type: DataTypes.DATE },
   },
   {
     indexes: [{ unique: true, fields: ['email'] }],

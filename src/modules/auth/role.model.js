@@ -12,7 +12,6 @@ const Role = sequelize.define(
     },
     description: {
       type: DataTypes.TEXT,
-      allowNull: true,
     },
     accessLevel: {
       type: DataTypes.STRING,

@@ -22,6 +22,10 @@ module.exports = {
         onUpdate: 'CASCADE',
         onDelete: 'SET NULL',
       },
+      verificationToken: { type: Sequelize.STRING },
+      verifiedAt: { type: Sequelize.DATE },
+      passwordResetToken: { type: Sequelize.STRING },
+      passwordResetExpires: { type: Sequelize.DATE },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
